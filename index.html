@@ -1,1 +1,230 @@
-"Hello World!"
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sports Stats — Sample Template</title>
+  <!-- Tailwind CDN (for quick prototyping) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Small extra polish for table scrolling + sticky header */
+    .table-container { max-height: 56vh; overflow: auto; }
+    thead th { position: sticky; top: 0; background: white; z-index: 10; }
+    /* Tiny responsive tweak for narrow screens */
+    @media (max-width: 640px) {
+      .desktop-only { display: none; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-md bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold">SS</div>
+        <div>
+          <h1 class="text-lg font-semibold">Sports Stats — Sample</h1>
+          <p class="text-sm text-slate-500">Lightweight template inspired by stats sites</p>
+        </div>
+      </div>
+
+      <nav class="ml-auto flex items-center gap-3">
+        <input id="search" type="search" placeholder="Search players, teams, seasons..." class="border rounded-md px-3 py-2 w-64" />
+        <button id="export" class="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm">Export CSV</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Left: Filters / Info -->
+    <aside class="lg:col-span-1 bg-white p-4 rounded-md shadow-sm">
+      <h2 class="font-semibold mb-3">Filters</h2>
+      <label class="block text-sm text-slate-600">Season</label>
+      <select id="season" class="w-full border rounded-md p-2 mt-1 mb-3">
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+
+      <label class="block text-sm text-slate-600">Position</label>
+      <select id="position" class="w-full border rounded-md p-2 mt-1 mb-3">
+        <option value="all">All</option>
+        <option value="G">G</option>
+        <option value="F">F</option>
+        <option value="C">C</option>
+      </select>
+
+      <div class="mt-4">
+        <h3 class="text-sm font-medium mb-2">Quick links</h3>
+        <ul class="text-sm text-indigo-600 space-y-1">
+          <li><a href="#" class="hover:underline">Team pages</a></li>
+          <li><a href="#" class="hover:underline">League leaders</a></li>
+          <li><a href="#" class="hover:underline">Season splits</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Right: Table / Content -->
+    <section class="lg:col-span-3">
+      <div class="bg-white p-4 rounded-md shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold">Player Season Stats</h2>
+          <div class="text-sm text-slate-500">Showing sample data • sortable columns</div>
+        </div>
+
+        <!-- Table controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-slate-600">Rows:</label>
+            <select id="rowsPerPage" class="border rounded-md p-1">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+            </select>
+          </div>
+
+          <div class="text-sm text-slate-500">Total players: <span id="totalCount">12</span></div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container border rounded-md">
+          <table id="statsTable" class="min-w-full divide-y">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="text-left px-4 py-2">#</th>
+                <th class="text-left px-4 py-2">Player</th>
+                <th class="desktop-only text-left px-4 py-2">Team</th>
+                <th class="text-right px-4 py-2">G</th>
+                <th class="text-right px-4 py-2">PTS</th>
+                <th class="text-right px-4 py-2">AST</th>
+                <th class="text-right px-4 py-2">REB</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="bg-white divide-y">
+              <!-- Sample rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination (simple) -->
+        <div class="mt-3 flex items-center justify-between">
+          <div class="text-sm text-slate-600">Page <span id="currentPage">1</span></div>
+          <div class="flex gap-2">
+            <button id="prevBtn" class="px-3 py-1 border rounded-md">Prev</button>
+            <button id="nextBtn" class="px-3 py-1 border rounded-md">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-sm text-slate-500 py-6">
+    Sample template — adapt data and styling. Not affiliated with any site.
+  </footer>
+
+  <!-- Minimal JS: sample data, filter/search, sort, export CSV -->
+  <script>
+    // Sample dataset (thin mock of what a stats site might show)
+    const data = [
+      {id:1, player:'Jon Doe', team:'NYR', g:82, pts:25.4, ast:6.1, reb:7.3},
+      {id:2, player:'Sam Rivers', team:'LAX', g:79, pts:22.1, ast:3.9, reb:5.2},
+      {id:3, player:'Mike King', team:'CHI', g:80, pts:19.3, ast:4.5, reb:8.1},
+      {id:4, player:'Luis Vega', team:'BOS', g:72, pts:18.7, ast:5.9, reb:4.4},
+      {id:5, player:'Ken Park', team:'MIA', g:81, pts:17.2, ast:2.1, reb:6.6},
+      {id:6, player:'Evan Stone', team:'PHI', g:66, pts:16.5, ast:7.2, reb:3.8},
+      {id:7, player:'Chris Long', team:'DAL', g:60, pts:15.4, ast:2.0, reb:7.9},
+      {id:8, player:'Aaron West', team:'GSW', g:78, pts:14.9, ast:6.8, reb:5.0},
+      {id:9, player:'Rui Tan', team:'POR', g:82, pts:14.3, ast:4.1, reb:4.9},
+      {id:10, player:'Noah Chen', team:'ATL', g:65, pts:13.2, ast:3.3, reb:6.4},
+      {id:11, player:'Omar Ali', team:'OKC', g:70, pts:12.8, ast:2.9, reb:8.7},
+      {id:12, player:'Ben Holt', team:'UTA', g:68, pts:11.5, ast:1.8, reb:5.5}
+    ];
+
+    // State
+    let current = [...data];
+    let sortKey = null;
+    let sortDir = 1; // 1 asc, -1 desc
+    let page = 1;
+    let perPage = 10;
+
+    // Helpers
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      // Pagination
+      const start = (page-1)*perPage;
+      const slice = current.slice(start, start + perPage);
+
+      slice.forEach((row,i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-2">${start + i + 1}</td>
+          <td class="px-4 py-2 font-medium">${row.player}</td>
+          <td class="desktop-only px-4 py-2">${row.team}</td>
+          <td class="px-4 py-2 text-right">${row.g}</td>
+          <td class="px-4 py-2 text-right">${row.pts}</td>
+          <td class="px-4 py-2 text-right">${row.ast}</td>
+          <td class="px-4 py-2 text-right">${row.reb}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalCount').textContent = current.length;
+      document.getElementById('currentPage').textContent = page;
+    }
+
+    function sortBy(key) {
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = 1; }
+      current.sort((a,b) => (a[key] > b[key] ? 1 : -1) * sortDir);
+      page = 1; renderTable();
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const season = document.getElementById('season').value;
+      const pos = document.getElementById('position').value;
+
+      // This mock data doesn't have season/position — show how you'd filter
+      current = data.filter(r => r.player.toLowerCase().includes(q) || r.team.toLowerCase().includes(q));
+      page = 1; renderTable();
+    }
+
+    function exportCSV() {
+      const headers = ['id','player','team','g','pts','ast','reb'];
+      const rows = current.map(r => [r.id,r.player,r.team,r.g,r.pts,r.ast,r.reb].join(','));
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'stats-export.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // Wire up events
+    document.getElementById('search').addEventListener('input', () => applyFilters());
+    document.getElementById('season').addEventListener('change', applyFilters);
+    document.getElementById('position').addEventListener('change', applyFilters);
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { perPage = Number(e.target.value); page = 1; renderTable(); });
+    document.getElementById('prevBtn').addEventListener('click', () => { if (page>1) { page--; renderTable(); } });
+    document.getElementById('nextBtn').addEventListener('click', () => { if (page*perPage < current.length) { page++; renderTable(); } });
+    document.getElementById('export').addEventListener('click', exportCSV);
+
+    // Make headers clickable for sorting
+    document.querySelectorAll('thead th').forEach((th, idx) => {
+      const keys = [null, 'player', 'team', 'g', 'pts', 'ast', 'reb'];
+      if (!keys[idx]) return;
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', () => sortBy(keys[idx]));
+    });
+
+    // Initial render
+    renderTable();
+  </script>
+
+</body>
+</html>
